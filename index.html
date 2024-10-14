@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Pedidos de Pizzaria</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: row;
+        }
+        .container {
+            width: 80%;
+            display: flex;
+            justify-content: space-between;
+        }
+        .form-container {
+            width: 45%;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .form-group input[type="radio"] {
+            width: auto;
+        }
+        .form-group .pizza-size {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+        .form-group .pizza-size li {
+            display: inline;
+            margin-right: 10px;
+        }
+        .btn {
+            background: #333;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .btn:hover {
+            background: #555;
+        }
+        .order-list {
+            width: 45%;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .order-list h2 {
+            margin-top: 0;
+        }
+        .order-item {
+            border-bottom: 1px solid #ddd;
+            padding: 10px 0;
+        }
+        .order-item:last-child {
+            border-bottom: none;
+        }
+        .pizza-item {
+            margin-bottom: 10px;
+        }
+        .btn-delete {
+            background: #d9534f;
+            color: #fff;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .btn-delete:hover {
+            background: #c9302c;
+        }
+		.header{
+		 display: flex;
+		  width: 80%;
+    
+		}
+    </style>
+</head>
+<body>
+
+    <div class="container">
+	 
+        <!-- Formulário de Pedido -->
+        <div class="form-container">
+            <h2>Faça seu pedido</h2>
+            <form id="pizza-form">
+                <div class="form-group">
+                    <label for="customer-name">Nome:</label>
+                    <input type="text" id="customer-name" name="customer-name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="customer-phone">Telefone:</label>
+                    <input type="tel" id="customer-phone" name="customer-phone" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="pizza-type">Tipo de Pizza:</label>
+					<input type="text" id="pizza-type" name="pizza-type" required>
+                     
+                </div>
+
+                <div class="form-group">
+                    <label>Tamanho:</label>
+                    <ul class="pizza-size">
+                        <li><input type="radio" id="small" name="pizza-size" value="small">Pequena
+                        <input type="radio" id="medium" name="pizza-size" value="medium">Média
+                        <input type="radio" id="large" name="pizza-size" value="large">Grande</li>
+                    </ul>
+                </div>
+
+                <div class="form-group">
+                    <label for="additional-info">Informações Adicionais:</label>
+                    <textarea id="additional-info" name="additional-info" rows="4" placeholder="Adicione qualquer informação adicional ou instruções especiais"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <button type="submit" class="btn">Enviar Pedido</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Lista de Pedidos -->
+        <div class="order-list">
+            <h2>Pedidos Enviados</h2>
+            <div id="order-items">
+                <!-- Pedidos serão adicionados aqui -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('pizza-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            // Obtendo os valores dos campos do formulário
+            const customerName = document.getElementById('customer-name').value;
+            const customerPhone = document.getElementById('customer-phone').value;
+            const pizzaType = document.getElementById('pizza-type').value;
+            const pizzaSize = document.querySelector('input[name="pizza-size"]:checked').value;
+            const additionalInfo = document.getElementById('additional-info').value;
+
+            // Criando um novo item para a lista de pedidos
+            const orderItem = document.createElement('div');
+            orderItem.className = 'order-item';
+            orderItem.innerHTML = `
+                <strong>Nome:</strong> ${customerName} <br>
+                <strong>Telefone:</strong> ${customerPhone} <br>
+                <strong>Tipo de Pizza:</strong> ${pizzaType} <br>
+                <strong>Tamanho:</strong> ${pizzaSize} <br>
+                <strong>Informações Adicionais:</strong> ${additionalInfo} <br>
+                <strong>Pizzas:</strong> <br> ${createPizzaList(pizzaType, pizzaSize)}
+                <br>
+                <button class="btn-delete" onclick="markOrderAsDelivered(this)">Pedido Entregue</button>
+            `;
+
+            // Adicionando o novo item à lista de pedidos
+            document.getElementById('order-items').appendChild(orderItem);
+
+            // Limpando o formulário
+            document.getElementById('pizza-form').reset();
+        });
+
+        function createPizzaList(pizzaType, pizzaSize) {
+            const pizzaListDiv = document.createElement('div');
+            pizzaListDiv.className = 'pizza-item';
+            pizzaListDiv.innerHTML = `
+                <div>
+                    <strong>Tipo:</strong> ${pizzaType} <br>
+                    <strong>Tamanho:</strong> ${pizzaSize}
+                </div>
+            `;
+            return pizzaListDiv.outerHTML;
+        }
+
+        function markOrderAsDelivered(button) {
+            // Remove o pedido completo do DOM
+            button.parentElement.remove();
+        }
+    </script>
+</body>
+</html>
